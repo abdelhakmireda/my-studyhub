@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="layout-container">
+    <aside class="sidebarr" id="sidebarr">
+        <button id="togglesidebarr" class="sidebarr-toggle-btn">☰</button>
+        <div class="avatar-section">
+            {% set initials = user.nom|slice(0, 1) ~ user.prenom|slice(0, 1) %}
+            <div class="avatar-circle">{{ initials }}</div>
+            <span class="avatar-name">{{ user.nom }} {{ user.prenom }}</span>
+        </div>
+        <nav class="sidebarr-menu">
+            <a href="{{ path('app_home_dashboard') }}" class="sidebarr-link">📊 Dashboard</a>
+            <a href="{{ path('app_home') }}" class="sidebarr-link">📚 Myspace</a>
+            <a href="{{ path('app_home_allcours') }}" class="sidebarr-link">🌍 Tous les cours</a>
+        </nav>
+    </aside>
+
+    <button id="showsidebarrBtn" class="show-sidebarr-btn" style="display: none;">☰</button>
+
+    <main class="main-content" id="mainContent">
+        <header class="header-container">
+            <div class="profile-menu">
+                <button class="profile-toggle" id="profileToggle">
+                    👤 Profil
+                </button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="#">⚙️ Paramètres</a>
+                    <hr>
+                    <a href="{{ path('app_logout') }}">🚪 Se déconnecter</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="courses-section">
+            <h1 class="title mb-4 fw-bold">📊 Dashboard</h1>
+            <div class="cards-container">
+                {% for card in cards %}
+                    <div class="card" style="background-color: {{ card.numbercolor }};">
+                        <a href="{{ card.route }}" style="text-decoration: none;">
+                            <div class="title-card" style="color: {{ card.color }};">
+                                {% if card.icon %}
+                                    <div class="icons" style="font-size: 2rem;">
+                                        <i class="{{ card.icon }}"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="number">{{ card.value }}</div>
+                                <div class="title">{{ card.title }}</div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+
+{% block stylesheets %}
+{{ parent() }}
+<script>
+    document.addEventListener('turbo:load', function () {
+        const sidebarr = document.getElementById('sidebarr');
+        const toggleBtn = document.getElementById('togglesidebarr');
+        const showsidebarrBtn = document.getElementById('showsidebarrBtn');
+        const profileBtn = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebarr.classList.add('hidden');
+            showsidebarrBtn.style.display = 'block';
+        });
+
+        showsidebarrBtn.addEventListener('click', () => {
+            sidebarr.classList.remove('hidden');
+            showsidebarrBtn.style.display = 'none';
+        });
+
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                profileDropdown.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

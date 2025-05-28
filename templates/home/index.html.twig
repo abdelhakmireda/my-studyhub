@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}📘 Mes Cours{% endblock %}
+
+{% block body %}
+<div class="layout-container">
+    {% include 'home/sidebar.html.twig' %}
+
+    <button id="showsidebarrBtn" class="show-sidebarr-btn" style="display: none;">☰</button>
+
+    <main class="main-content" id="mainContent">
+        {% include 'home/header.html.twig' %}
+        <section class="courses-section">
+            <h1 class="title">📘 Mes cours</h1>
+            {% if app.request.attributes.get('_route') == 'app_home' %}
+                <div style=" margin-bottom: 20px;">
+                    <a href="{{ path('app_cours_new') }}"
+                    style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 18px;
+                        background-color: var(--color-sidebarr);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        transition: background 0.3s;
+                    ">
+                        <i class="fas fa-plus" style="color: white;"></i>
+                        Créer un Cours
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="card-container">
+                {% for cour in cours %}
+                    {% set isMine = cour.utilisateur.id == user.id %}
+                    {% set cardColor = isMine ? 'rgba(79, 170, 234, 0.5)' : 'rgba(77, 182, 172, 0.5)' %}
+                    {% set textColor = isMine ? '#0d47a1' : '#004d40' %}
+
+                    <div class="card" style="background-color: {{ cardColor }}; padding: 20px; border-radius: 10px; margin-bottom: 15px; position: relative;">
+                        <!-- Bouton points -->
+                        {% if isMine %}
+                        <div class="card-menu-wrapper">
+                            <button class="card-menu-btn" aria-label="Options">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="card-menu-dropdown">
+                                <a href="{{ path('app_cours_edit', {'id': cour.id}) }}" class="edit">Modifier</a>
+
+                                {# Formulaire suppression #}
+                                <form  class="delete-button" method="post" action="{{ path('app_cours_delete', {'id': cour.id}) }}" style="display:inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer ce cours ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cour.id) }}">
+                                    <button type="submit" class="delete" style="background:none; border:none; color:#dc3545; cursor:pointer; padding:0; font-size:1em;">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="title-card" style="color: {{ textColor }};">
+                            <div class="icons" style="font-size: 2rem; color: {{ textColor }};">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <div class="titre-cours">{{ cour.nom }}</div>
+                            <div class="create-by" style="color: {{ textColor }};">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                {{ cour.utilisateur.nom ~ ' ' ~ cour.utilisateur.prenom }}
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <a href="{{ path('app_cours_show', {'id': cour.id}) }}"
+                            style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; background-color: white; color: {{ textColor }}; text-decoration: none; font-weight: bold;">
+                                <i class="fas fa-eye"></i> Consulter
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>Aucun cours trouvé.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<script>
+    document.addEventListener('turbo:load', function () {
+        const sidebarr = document.getElementById('sidebarr');
+        const toggleBtn = document.getElementById('togglesidebarr');
+        const showsidebarrBtn = document.getElementById('showsidebarrBtn');
+        const profileBtn = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebarr.classList.add('hidden');
+            showsidebarrBtn.style.display = 'block';
+        });
+
+        showsidebarrBtn.addEventListener('click', () => {
+            sidebarr.classList.remove('hidden');
+            showsidebarrBtn.style.display = 'none';
+        });
+
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                profileDropdown.style.display = 'none';
+            }
+        });
+    });
+    document.addEventListener('turbo:load', () => {
+    // Trouve tous les boutons menu
+    document.querySelectorAll('.card-menu-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Ferme tous les menus ouverts sauf celui-ci
+            document.querySelectorAll('.card-menu-dropdown').forEach(menu => {
+                if (menu !== button.nextElementSibling) {
+                    menu.style.display = 'none';
+                }
+            });
+
+            // Toggle le menu lié au bouton
+            const menu = button.nextElementSibling;
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+    // Fermer le menu si clic ailleurs
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.card-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    });
+});
+
+</script>
+{% endblock %}

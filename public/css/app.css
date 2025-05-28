@@ -1,0 +1,51 @@
+
+.number {
+    font-size: 50px;
+    font-weight: 700;
+}
+
+.hidden {
+    display: none !important;
+}
+.cards-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; 
+    padding: 10px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 20px;
+    flex: 1 1 calc(25% - 20px);
+    min-width: 200px;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); 
+    border-color: #bfbfbf;
+}
+
+.title-card svg {
+    width: 70px;
+    background: var(--color-background);
+    padding: 10px;
+    border-radius: 25px;
+    text-align: start;
+    display: flex;
+}
+.title-card .number,.title-card .title{
+    width: max-content;
+}
+.title-card .title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+

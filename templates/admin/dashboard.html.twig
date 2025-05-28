@@ -1,0 +1,25 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content %}
+   <div> 
+     <h1 class="mb-4 fw-bold">📊 Tableau de bord</h1>
+
+        <div  class="cards-container">
+            {% for card in cards %}
+                    <div class="card" style="background-color: {{ card.numbercolor }}; ">
+                        <a href="{{ card.route }}" style="text-decoration: none;">
+                            <div class="title-card" style="color: {{ card.color }};">
+                                {% if card.icon %}
+                                    <div class="icons" style="font-size: 2rem;">
+                                        <i class="{{ card.icon }}"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="number" >{{ card.value }}</div>
+                                <div class="title">{{ card.title }}</div>
+                            </div>
+                        </a>
+                    </div>
+            {% endfor %}  
+        </div>
+    </div>
+{% endblock %}
