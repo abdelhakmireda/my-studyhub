@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\CoursRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
@@ -24,6 +26,15 @@ class Cours
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?Departement $Departement = null;
+
+    #[ORM\OneToMany(mappedBy: 'cours', targetEntity: Fichier::class, cascade: ['persist', 'remove'])]
+    private Collection $fichiers;
+
+    
+    public function __construct()
+    {
+        $this->fichiers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -74,6 +85,31 @@ class Cours
     public function setDepartement(?Departement $Departement): static
     {
         $this->Departement = $Departement;
+
+        return $this;
+    }
+    public function getFichiers(): Collection
+    {
+        return $this->fichiers;
+    }
+    
+    public function addFichier(Fichier $fichier): static
+    {
+        if (!$this->fichiers->contains($fichier)) {
+            $this->fichiers[] = $fichier;
+            $fichier->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFichier(Fichier $fichier): static
+    {
+        if ($this->fichiers->removeElement($fichier)) {
+            if ($fichier->getCours() === $this) {
+                $fichier->setCours(null);
+            }
+        }
 
         return $this;
     }

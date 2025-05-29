@@ -1,55 +1,101 @@
-{{ form_start(form) }}
+{% extends 'base.html.twig' %}
 
-<div class="form-group">
-    {{ form_label(form.Nom) }}
-    {{ form_widget(form.Nom, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.Nom) }}
-</div>
+{% block body %}
+    <h1>Créer un nouveau cours</h1>
 
-<div class="form-group">
-    {{ form_label(form.Description) }}
-    {{ form_widget(form.Description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
-    {{ form_errors(form.Description) }}
-</div>
+    {{ form_start(form) }}
 
-<button class="btn btn-primary btn-submit">{{ button_label|default('Enregistrer') }}</button>
+    <div class="form-group">
+        {{ form_label(form.Nom) }}
+        {{ form_widget(form.Nom, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.Nom) }}
+    </div>
 
-{{ form_end(form) }}
+    <div class="form-group">
+        {{ form_label(form.Description) }}
+        {{ form_widget(form.Description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+        {{ form_errors(form.Description) }}
+    </div>
 
-<style>
-    .form-group {
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
+    <div class="form-group">
+        <label class="pdf-label">Fichiers PDF</label>
+        <div id="fichiers-container" data-prototype="{{ form_widget(form.fichiers.vars.prototype)|e('html_attr') }}">
+            {{ form_widget(form.fichiers) }}
+        </div>
+        {{ form_errors(form.fichiers) }}
+
+        <button type="button" id="add-file-btn" class="btn btn-submit btn-vert mt-3">Ajouter un fichier</button>
+    </div>
+
+    <button class="btn btn-primary btn-submit">{{ button_label|default('Enregistrer') }}</button>
+
+    {{ form_end(form) }}
+
+    <style>
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: #333;
+            letter-spacing: 0.02em;
+        }
+
+        .form-control {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+            outline: none;
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            width: max-content;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(45deg, #0056b3, #003d7a);
+            box-shadow: 0 6px 20px rgba(0,86,179,0.6);
+        }
+        /* Label PDF stylisé */
+    .pdf-label {
+        font-weight: 700;
+        font-size: 1.2em;
+        color: #2c3e50;
+        letter-spacing: 0.05em;
+        margin-bottom: 10px;
+        display: inline-block;
+        text-transform: uppercase;
     }
 
-    label {
-        font-weight: 600;
-        margin-bottom: 8px;
-        font-size: 1.1em;
-        color: #333;
-        letter-spacing: 0.02em;
-    }
-
-    .form-control {
-        padding: 10px 15px;
-        font-size: 1em;
-        border: 2px solid #ccc;
-        border-radius: 8px;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        resize: vertical;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .form-control:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
-        outline: none;
-    }
-
-    .btn-submit {
-        background: linear-gradient(45deg, #007bff, #0056b3);
+    /* Bouton Ajouter fichier vert, même style que btn-submit */
+    .btn-vert {
+        background: linear-gradient(45deg, #28a745, #1e7e34);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
         border: none;
         color: white;
         padding: 12px 25px;
@@ -57,13 +103,92 @@
         font-weight: 600;
         border-radius: 30px;
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,123,255,0.4);
         transition: background 0.3s ease, box-shadow 0.3s ease;
         width: max-content;
     }
 
-    .btn-submit:hover {
-        background: linear-gradient(45deg, #0056b3, #003d7a);
-        box-shadow: 0 6px 20px rgba(0,86,179,0.6);
+    .btn-vert:hover {
+        background: linear-gradient(45deg, #1e7e34, #145c23);
+        box-shadow: 0 6px 20px rgba(30, 126, 52, 0.6);
     }
-</style>
+
+    /* Bouton Supprimer rouge sophistiqué */
+    .btn-supprimer {
+        background: linear-gradient(45deg, #dc3545, #a71d2a);
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.5);
+        border: none;
+        color: white;
+        padding: 6px 14px;
+        font-size: 0.9em;
+        font-weight: 600;
+        border-radius: 20px;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+        float: right;
+        width:max-content;
+    }
+
+    .btn-supprimer:hover {
+        background: linear-gradient(45deg, #a71d2a, #7f141f);
+        box-shadow: 0 5px 15px rgba(167, 29, 42, 0.7);
+    }
+
+    /* Pour bien espacer chaque groupe fichier */
+    #fichiers-container > .form-group {
+        position: relative;
+        padding-right: 90px; /* espace pour bouton supprimer */
+        margin-bottom: 15px;
+    }
+    </style>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+  document.addEventListener('turbo:load', function () {
+            let collectionHolder = document.getElementById('fichiers-container');
+            let addButton = document.getElementById('add-file-btn');
+
+            // Commencer l'index à partir du nombre d'enfants existants
+            let index = collectionHolder.children.length;
+
+            addButton.addEventListener('click', function () {
+                let prototype = collectionHolder.dataset.prototype;
+                let newForm = prototype.replace(/__name__/g, index);
+
+                let div = document.createElement('div');
+                div.classList.add('form-group');
+                div.innerHTML = newForm;
+
+                // Créer un bouton supprimer rouge sophistiqué
+                let deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.textContent = 'Supprimer';
+                deleteBtn.className = 'btn-supprimer';
+
+                // Ajouter l'action pour supprimer le fichier
+                deleteBtn.addEventListener('click', () => div.remove());
+
+                // Ajout du bouton supprimer dans le div
+                div.appendChild(deleteBtn);
+
+                collectionHolder.appendChild(div);
+
+                index++;
+            });
+
+            // Pour chaque fichier déjà présent, ajouter bouton supprimer si pas présent
+            Array.from(collectionHolder.children).forEach(div => {
+                if (!div.querySelector('.btn-supprimer')) {
+                    let deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.textContent = 'Supprimer';
+                    deleteBtn.className = 'btn-supprimer';
+                    deleteBtn.addEventListener('click', () => div.remove());
+                    div.appendChild(deleteBtn);
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
