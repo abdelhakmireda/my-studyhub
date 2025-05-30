@@ -37,7 +37,7 @@
                             {% for fichier in cour.fichiers %}
                                 <li class="list-group-item">
                                     <span style="color: #dc3545;">📄</span>
-                                    <a href="{{ asset(fichier.path) }}" target="_blank" style="text-decoration: none;">
+                                    <a href="{{  asset('uploads/pdf/' ~ fichier.path) }}" target="_blank" style="text-decoration: none;">
                                         {{ fichier.nom }}
                                          <a href="{{ asset('uploads/pdf/' ~ fichier.path) }}" target="_blank">Télécharger</a>
                                     </a>

@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🎓 StudyHub | Register{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body {
+        background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
+                    url('https://images.unsplash.com/photo-1587614203976-365c74645e83') no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .register-box {
+        max-width: 400px;
+        margin: 80px auto;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+    }
+    .register-box form {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .app-title {
+        font-size: 32px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+        color: #ffd700;
+    }
+
+    label {
+        margin-top: 15px;
+        font-weight: bold;
+        color: #ddd;
+        transition: color 0.3s ease;
+    }
+
+    label:hover {
+        color: #ffd700;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: border 0.3s;
+        padding: 10px 10px;
+        width: 100%;
+        background: transparent;
+        color: white;
+    }
+
+    .form-control:focus {
+        border-color: #ffd700;
+        box-shadow: 0 0 5px #ffd700;
+        outline: none;
+    }
+
+    .btn-register {
+        background-color: #e9e8e5;
+        color: #625e5e;
+        font-weight: bold;
+        border-radius: 10px;
+        width: 100%;
+        margin-top: 20px;
+        transition: background 0.3s ease;
+        padding: 10px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-register:hover {
+        background-color: #ffcc00;
+    }
+
+    .alert-danger {
+        background-color: #dc3545;
+        color: white;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="register-box">
+    <div class="app-title">
+        📚 StudyHub - Inscription
+    </div>
+
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    {{ form_start(registrationForm) }}
+
+        {{ form_errors(registrationForm) }}
+
+        <label for="{{ registrationForm.nom.vars.id }}">Nom</label>
+        {{ form_widget(registrationForm.nom, {attr: {class: 'form-control'}}) }}
+
+        <label for="{{ registrationForm.prenom.vars.id }}">Prénom</label>
+        {{ form_widget(registrationForm.prenom, {attr: {class: 'form-control'}}) }}
+
+        <label for="{{ registrationForm.departement.vars.id }}">Département</label>
+        {{ form_widget(registrationForm.departement, {attr: {class: 'form-control'}}) }}
+
+        <label for="{{ registrationForm.email.vars.id }}">Adresse e-mail</label>
+        {{ form_widget(registrationForm.email, {attr: {class: 'form-control'}}) }}
+
+        <label for="{{ registrationForm.plainPassword.vars.id }}">Mot de passe</label>
+        {{ form_widget(registrationForm.plainPassword, {attr: {class: 'form-control'}}) }}
+
+        <label for="{{ registrationForm.agreeTerms.vars.id }}" style="margin-top:20px;">
+            {{ form_widget(registrationForm.agreeTerms) }} J'accepte les conditions générales
+        </label>
+
+        <button type="submit" class="btn-register">S'inscrire 🚀</button>
+    {{ form_end(registrationForm) }}
+    <div class="links-container">
+        <a href="{{ path('app_login') }}">Se Connecter </a> |
+        <a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
+    </div>
+</div>
+{% endblock %}

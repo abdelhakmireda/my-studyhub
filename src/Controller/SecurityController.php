@@ -20,7 +20,13 @@ class SecurityController extends AbstractController
         $error = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
-
+        if ($error) {
+                $errorMessage = match ($error->getMessageKey()) {
+                    'Invalid credentials.' => 'Mot de passe incorrect',
+                    default => $error->getMessage(),
+                };
+                $this->addFlash('danger', $errorMessage);
+            }
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'danger' => $error]);
     }
 
