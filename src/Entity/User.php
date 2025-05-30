@@ -244,4 +244,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+        public function isActive(): bool
+    {
+        return $this->deletedAt === null;
+    }
+    public function getStatut(): string
+    {
+        return $this->getDeletedAt() === null ? 'Activé' : 'Supprimé';
+    }
 }
