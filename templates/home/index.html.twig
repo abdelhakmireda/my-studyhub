@@ -71,6 +71,7 @@
                             </div>
                         </div>
                         {% include 'cours/_favoris_button.html.twig' with {'cour': cour} %}
+                        {% include 'cours/_signalement_button.html.twig' with {'cour': cour} %}
                         <div style="margin-top: 10px;">
                             <a href="{{ path('app_cours_show', {'id': cour.id}) }}"
                             style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; background-color: white; color: {{ textColor }}; text-decoration: none; font-weight: bold;">

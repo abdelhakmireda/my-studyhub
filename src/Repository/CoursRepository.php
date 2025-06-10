@@ -16,7 +16,15 @@ class CoursRepository extends ServiceEntityRepository
         parent::__construct($registry, Cours::class);
     }
     
-
+public function findCoursVisibles()
+{
+    return $this->createQueryBuilder('c')
+        ->leftJoin('c.signalements', 's')
+        ->groupBy('c.id')
+        ->having('COUNT(s.id) < 3')
+        ->getQuery()
+        ->getResult();
+}
 //    /**
 //     * @return Cours[] Returns an array of Cours objects
 //     */

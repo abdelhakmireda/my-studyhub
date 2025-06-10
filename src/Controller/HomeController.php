@@ -41,7 +41,7 @@ final class HomeController extends AbstractController
             'Utilisateur' => $user,
         ]);
 
-
+        $cours = $coursRepository->findCoursVisibles();
         return $this->render('home/index.html.twig', [
             'route'=>$this->adminUrlGenerator->setController(UserCrudController::class)->generateUrl(),
             'user'=>$user,
@@ -77,9 +77,7 @@ final class HomeController extends AbstractController
             throw $this->createAccessDeniedException('Vous devez être connecté pour voir vos cours.');
         }
 
-        // On récupère les cours du user connecté via le repository
-        $cours = $coursRepository->findAll();
-
+        $cours = $coursRepository->findCoursVisibles();
 
         return $this->render('home/index.html.twig', [
             'route'=>$this->adminUrlGenerator->setController(UserCrudController::class)->generateUrl(),

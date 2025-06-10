@@ -168,4 +168,13 @@ class Cours
     {
         return $this->deletedAt === null;
     }
+    public function getNombreSignalements(): int
+    {
+        return count($this->signalements);
+    }
+
+    public function isDisplayable(): bool
+    {
+        return $this->getNombreSignalements() < 3;
+    }
 }

@@ -1,0 +1,14 @@
+<turbo-frame id="signalement_cours-{{ cour.id }}" data-turbo-frame="partial">
+    <div style="margin-top: 10px; display: flex; align-items: center;">
+        <a href="{{ path('cours_signalement', {id: cour.id}) }}"
+           class="btn-warning"
+           title="{{ app.user.hasSignalement(cour) ? 'Retirer le signalement' : 'Signaler ce cours' }}"
+           style="font-size: 1.5rem; color: {{ app.user.hasSignalement(cour) ? 'orange' : '#555' }}; text-decoration: none;">
+            {% if app.user.hasSignalement(cour) %}
+                <i class="fas fa-exclamation-triangle"></i> <!-- Signalement rempli -->
+            {% else %}
+                <i class="far fa-exclamation-triangle"></i> <!-- Signalement vide -->
+            {% endif %}
+        </a>
+    </div>
+</turbo-frame>

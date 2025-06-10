@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Cours;
 use App\Entity\Fichier;
+use App\Entity\Signalement;
 use App\Entity\User;
 use App\Form\CoursForm;
 use App\Repository\CoursRepository;
@@ -164,5 +165,47 @@ final class CoursController extends AbstractController
             'update' => true,
         ]);
     }
+#[Route('/signalement/{id}', name: 'cours_signalement')]
+public function signalerOuSupprimerSignalement(Cours $cours, EntityManagerInterface $em, Security $security): Response
+{
+    $user = $security->getUser();
+    if (!$user) {
+        $this->addFlash('error', 'Vous devez être connecté pour signaler un cours.');
+        return $this->redirectToRoute('app_home_dashboard');
+    }
 
+    // Vérifier si l'utilisateur a déjà signalé ce cours
+    foreach ($cours->getSignalements() as $signalement) {
+        if ($signalement->getUser() === $user) {
+            // SUPPRIMER le signalement existant
+            $em->remove($signalement);
+            $em->flush();
+
+            $this->addFlash('success', 'Signalement retiré avec succès.');
+            return $this->render('cours/_signalement_button.html.twig', [
+                'cour' => $cours,
+                'update' => true,
+            ]);
+        }
+    }
+
+    // AJOUTER un nouveau signalement
+    $signalement = new Signalement();
+    $signalement->setCours($cours);
+    $signalement->setUser($user);
+    $em->persist($signalement);
+    $em->flush();
+
+    // Vérifier si le cours doit être masqué
+    if ($cours->getNombreSignalements() >= 3) {
+        $cours->setDeletedAt(new \DateTimeImmutable());
+        $em->flush();
+    }
+
+    $this->addFlash('success', 'Cours signalé avec succès.');
+    return $this->render('cours/_signalement_button.html.twig', [
+        'cour' => $cours,
+        'update' => true,
+    ]);
+}
 }

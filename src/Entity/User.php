@@ -64,11 +64,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'favoris')]
     private Collection $coursFavoris;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Signalement::class)]
+    private Collection $signalements;
+
+
 
     public function __construct()
     {
         $this->cours = new ArrayCollection();
         $this->coursFavoris = new ArrayCollection();
+        $this->signalements = new ArrayCollection();
+
     }
 
     public function getId(): ?int
@@ -282,4 +288,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    public function getSignalements(): Collection
+    {
+        return $this->signalements;
+    }
+
+    public function hasSignalement(Cours $cours): bool
+    {
+        foreach ($this->signalements as $signalement) {
+            if ($signalement->getCours() === $cours) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
