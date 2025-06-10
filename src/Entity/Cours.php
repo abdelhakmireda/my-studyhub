@@ -6,6 +6,9 @@ use App\Repository\CoursRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
+use App\Entity\User;
+use App\Entity\Signalement;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
@@ -30,10 +33,22 @@ class Cours
     #[ORM\OneToMany(mappedBy: 'cours', targetEntity: Fichier::class, cascade: ['persist', 'remove'])]
     private Collection $fichiers;
 
-    
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'coursFavoris')]
+    private Collection $favoris;
+
+    #[ORM\OneToMany(mappedBy: 'cours', targetEntity: Signalement::class, cascade: ['persist', 'remove'])]
+    private Collection $signalements;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
+
+
     public function __construct()
     {
         $this->fichiers = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
+        $this->signalements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,7 +107,7 @@ class Cours
     {
         return $this->fichiers;
     }
-    
+
     public function addFichier(Fichier $fichier): static
     {
         if (!$this->fichiers->contains($fichier)) {
@@ -112,5 +127,45 @@ class Cours
         }
 
         return $this;
+    }
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(User $user): static
+    {
+        if (!$this->favoris->contains($user)) {
+            $this->favoris[] = $user;
+        }
+
+        return $this;
+    }
+
+    public function removeFavori(User $user): static
+    {
+        $this->favoris->removeElement($user);
+        return $this;
+    }
+
+    public function getSignalements(): Collection
+    {
+        return $this->signalements;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->deletedAt === null;
     }
 }

@@ -1,0 +1,14 @@
+<turbo-frame id="validation_cours-{{ cour.id }}" data-turbo-frame="partial">
+    <div style="margin-top: 10px;">
+        <a href="{{ path('cours_toggle_favori', {'id': cour.id}) }}"
+            class="btn-favori"
+            title="{{ cour in app.user.coursFavoris ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+            style="font-size: 1.5rem; color: {{ cour in app.user.coursFavoris ? 'red' : '#555' }}; text-decoration: none; margin-right: 10px;">
+        {% if cour in app.user.coursFavoris %}
+            <i class="fas fa-heart"></i> <!-- rempli -->
+        {% else %}
+            <i class="far fa-heart"></i> <!-- vide -->
+        {% endif %}
+        </a>
+    </div>
+</turbo-frame>

@@ -10,6 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Cours;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -56,12 +58,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
-     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
+
+    #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'favoris')]
+    private Collection $coursFavoris;
+
 
     public function __construct()
     {
         $this->cours = new ArrayCollection();
+        $this->coursFavoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -206,7 +213,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-      public function getPlainPassword(): ?string
+    public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
     }
@@ -244,12 +251,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-        public function isActive(): bool
+    public function isActive(): bool
     {
         return $this->deletedAt === null;
     }
     public function getStatut(): string
     {
         return $this->getDeletedAt() === null ? 'Activé' : 'Supprimé';
+    }
+    public function getCoursFavoris(): Collection
+    {
+        return $this->coursFavoris;
+    }
+
+    public function addCoursFavori(Cours $cours): static
+    {
+        if (!$this->coursFavoris->contains($cours)) {
+            $this->coursFavoris[] = $cours;
+            $cours->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoursFavori(Cours $cours): static
+    {
+        if ($this->coursFavoris->removeElement($cours)) {
+            $cours->removeFavori($this);
+        }
+
+        return $this;
     }
 }

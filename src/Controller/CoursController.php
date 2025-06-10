@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/cours')]
@@ -24,13 +25,6 @@ final class CoursController extends AbstractController
     public function __construct(Security $Security)
     {
         $this->user = $Security->getUser();
-    }
-    #[Route(name: 'app_cours_index', methods: ['GET'])]
-    public function index(CoursRepository $coursRepository): Response
-    {
-        return $this->render('cours/index.html.twig', [
-            'cours' => $coursRepository->findAll(),
-        ]);
     }
 
     #[Route('/new', name: 'app_cours_new', methods: ['GET', 'POST'])]
@@ -148,6 +142,27 @@ final class CoursController extends AbstractController
         }
 
         return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
+    }
+     #[Route('/cours/{id}/favoris', name: 'cours_toggle_favori')]
+    public function toggleFavori(Cours $cours, EntityManagerInterface $em, Cours $cour): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        if ($user->getCoursFavoris()->contains($cours)) {
+            $user->removeCoursFavori($cours);
+            $this->addFlash('info', 'Cours retiré des favoris.');
+        } else {
+            $user->addCoursFavori($cours);
+            $this->addFlash('success', 'Cours ajouté aux favoris.');
+        }
+
+        $em->flush();
+
+        return $this->render('cours/_favoris_button.html.twig', [
+            'cour' => $cour,
+            'update' => true,
+        ]);
     }
 
 }

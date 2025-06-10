@@ -4,9 +4,11 @@
 namespace App\Controller;
 
 use App\Controller\Admin\UserCrudController;
+use App\Entity\User;
 use App\Repository\CoursRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -14,7 +16,11 @@ use Symfony\Contracts\Service\Attribute\Required;
 final class HomeController extends AbstractController
 {
      private AdminUrlGenerator $adminUrlGenerator;
-
+     private ?User $user;
+    public function __construct(Security $Security)
+    {
+        $this->user = $Security->getUser();
+    }
     #[Required]
     public function setAdminUrlGenerator(AdminUrlGenerator $adminUrlGenerator): void
     {
@@ -42,6 +48,25 @@ final class HomeController extends AbstractController
             'cours' => $cours,
         ]);
     }
+    #[Route('/home/mycours/favorite', name: 'app_home_favorite')]
+    public function Myfavorite(): Response
+    {
+        $user = $this->user;
+
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour voir vos favoris.');
+        }
+
+        // Les cours favoris sont dans l'entité User via coursFavoris
+        $coursFavoris = $user->getCoursFavoris();
+
+        return $this->render('home/index.html.twig', [
+            'route' => $this->adminUrlGenerator->setController(UserCrudController::class)->generateUrl(),
+            'user' => $user,
+            'cours' => $coursFavoris, // cours ici = favoris
+        ]);
+    }
+
      #[Route('/home/allcours', name: 'app_home_allcours')]
     public function allcours(CoursRepository $coursRepository): Response
     {
