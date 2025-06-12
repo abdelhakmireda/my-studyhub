@@ -25,6 +25,17 @@ public function findCoursVisibles()
         ->getQuery()
         ->getResult();
 }
+public function findCoursVisibless($utilisateur)
+{
+    return $this->createQueryBuilder('c')
+        ->andWhere('c.Utilisateur = :user')
+        ->setParameter('user', $utilisateur)
+        ->leftJoin('c.signalements', 's')
+        ->groupBy('c.id')
+        ->having('COUNT(s.id) < 3')
+        ->getQuery()
+        ->getResult();
+}
 //    /**
 //     * @return Cours[] Returns an array of Cours objects
 //     */

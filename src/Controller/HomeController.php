@@ -41,7 +41,7 @@ final class HomeController extends AbstractController
             'Utilisateur' => $user,
         ]);
 
-        $cours = $coursRepository->findCoursVisibles();
+        $cours = $coursRepository->findCoursVisibless($user);
         return $this->render('home/index.html.twig', [
             'route'=>$this->adminUrlGenerator->setController(UserCrudController::class)->generateUrl(),
             'user'=>$user,

@@ -11,7 +11,7 @@
     <main class="main-content" id="mainContent">
         {% include 'home/header.html.twig' %}
         <section class="courses-section">
-            <h1 class="title">📘 Mes cours</h1>
+            <h1 class="title">📘 Cours</h1>
             {% if app.request.attributes.get('_route') == 'app_home' %}
                 <div style=" margin-bottom: 20px;">
                     <a href="{{ path('app_cours_new') }}"

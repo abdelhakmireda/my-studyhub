@@ -75,7 +75,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         if (in_array('ROLE_ADMIN', $roles)) {
             return new RedirectResponse($this->adminUrlGenerator->setController(UserCrudController::class)->generateUrl());
         }  else  {
-            return new RedirectResponse($this->urlGenerator->generate('app_home'));
+            return new RedirectResponse($this->urlGenerator->generate('app_home_dashboard'));
         }
         return new RedirectResponse($this->adminUrlGenerator->setController(UserCrudController::class)->generateUrl());
     }
