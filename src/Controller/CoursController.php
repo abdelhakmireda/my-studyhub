@@ -208,4 +208,19 @@ public function signalerOuSupprimerSignalement(Cours $cours, EntityManagerInterf
         'update' => true,
     ]);
 }
+#[Route('/admin/cours/{id}/recuperer', name: 'admin_cours_recuperer', methods: ['POST'])]
+public function recupererCours(Cours $cours, EntityManagerInterface $em): Response
+{
+    // Supprimer tous les signalements du cours
+    foreach ($cours->getSignalements() as $signalement) {
+        $em->remove($signalement);
+    }
+
+    $em->flush();
+
+    $this->addFlash('success', 'Le cours a été récupéré avec succès.');
+
+    return $this->redirectToRoute('admin_signaled_courses');
+}
+
 }

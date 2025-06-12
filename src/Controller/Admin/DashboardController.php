@@ -100,13 +100,30 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Accueil', 'fa fa-home');
         yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-user', User::class);
-        yield MenuItem::linkToCrud('Cours', 'fas fa-book', Cours::class);
+        yield MenuItem::subMenu('Cours', 'fas fa-book')->setSubItems([
+            MenuItem::linkToCrud('Tous les cours', 'fas fa-list', Cours::class),
+            MenuItem::linkToRoute('Cours signalés', 'fas fa-flag', 'admin_signaled_courses'),
+        ]);
         yield MenuItem::linkToCrud('Départements', 'fas fa-building', Departement::class);
     }
+
     public function configureAssets(): Assets
     {
         return parent::configureAssets()
             ->addCssFile('styles/app.css');
+    }
+
+    #[Route('/admin/cours-signales', name: 'admin_signaled_courses')]
+    public function coursSignales(): Response
+    {
+        $coursSignales = $this->coursRepository->findAll(); // récup tous les cours
+
+        // Filtrer les cours signalés (nombre signalements >= 3)
+        $coursSignales = array_filter($coursSignales, fn(Cours $cours) => !$cours->isDisplayable());
+
+        return $this->render('admin/cours_signales.html.twig', [
+            'coursSignales' => $coursSignales,
+        ]);
     }
 
 }

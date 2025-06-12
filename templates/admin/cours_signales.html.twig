@@ -1,0 +1,34 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block body %}
+<h2>Cours signalés</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Nombre de signalements</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cours in coursSignales %}
+            <tr>
+                <td>{{ cours.nom }}</td>
+                <td>{{ cours.description }}</td>
+                <td>{{ cours.getNombreSignalements() }}</td>
+                <td>
+                    <form method="post" action="{{ path('admin_cours_recuperer', { id: cours.id }) }}">
+                        <button class="btn btn-success btn-sm">Récupérer</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">Aucun cours signalé.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
