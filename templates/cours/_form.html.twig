@@ -145,7 +145,7 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-  document.addEventListener('turbo:load', function () {
+  document.addEventListener('turbo:render', function () {
             let collectionHolder = document.getElementById('fichiers-container');
             let addButton = document.getElementById('add-file-btn');
 

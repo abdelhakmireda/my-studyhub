@@ -16,7 +16,7 @@ class Fichier
     #[ORM\Column(length: 255,nullable:true)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255,nullable:true)]
     private ?string $path = null;
 
     #[ORM\ManyToOne(inversedBy: 'fichiers')]
@@ -43,7 +43,7 @@ class Fichier
         return $this->path;
     }
 
-    public function setPath(string $path): static
+    public function setPath(?string $path): static
     {
         $this->path = $path;
         return $this;

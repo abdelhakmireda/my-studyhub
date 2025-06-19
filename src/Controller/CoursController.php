@@ -102,12 +102,41 @@ final class CoursController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_cours_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Cours $cour, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Cours $cour, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(CoursForm::class, $cour);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            foreach ($form->get('fichiers') as $fichierForm) {
+                /** @var UploadedFile|null $uploadedFile */
+                $uploadedFile = $fichierForm->get('nomFichier')->getData();
+
+                if (!$uploadedFile instanceof UploadedFile) {
+                    continue; // Ignore les champs sans fichier
+                }
+
+                $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
+
+                try {
+                    $uploadedFile->move(
+                        $this->getParameter('pdf_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    throw new \Exception("Erreur lors de l'upload du fichier : " . $e->getMessage());
+                }
+
+                $fichier = new Fichier();
+                $fichier->setNom($originalFilename);
+                $fichier->setPath($newFilename);
+                $fichier->setCours($cour);
+
+                $cour->addFichier($fichier);
+            }
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
@@ -116,14 +145,13 @@ final class CoursController extends AbstractController
         return $this->render('cours/edit.html.twig', [
             'user' => $this->user,
             'cour' => $cour,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
-
     #[Route('/{id}', name: 'app_cours_delete', methods: ['POST'])]
     public function delete(Request $request, Cours $cour, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$cour->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $cour->getId(), $request->request->get('_token'))) {
             // Récupérer le chemin du dossier des fichiers
             $pdfDirectory = $this->getParameter('pdf_directory');
 
@@ -144,7 +172,7 @@ final class CoursController extends AbstractController
 
         return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
     }
-     #[Route('/cours/{id}/favoris', name: 'cours_toggle_favori')]
+    #[Route('/cours/{id}/favoris', name: 'cours_toggle_favori')]
     public function toggleFavori(Cours $cours, EntityManagerInterface $em, Cours $cour): Response
     {
         /** @var \App\Entity\User $user */
@@ -165,62 +193,61 @@ final class CoursController extends AbstractController
             'update' => true,
         ]);
     }
-#[Route('/signalement/{id}', name: 'cours_signalement')]
-public function signalerOuSupprimerSignalement(Cours $cours, EntityManagerInterface $em, Security $security): Response
-{
-    $user = $security->getUser();
-    if (!$user) {
-        $this->addFlash('error', 'Vous devez être connecté pour signaler un cours.');
-        return $this->redirectToRoute('app_home_dashboard');
-    }
-
-    // Vérifier si l'utilisateur a déjà signalé ce cours
-    foreach ($cours->getSignalements() as $signalement) {
-        if ($signalement->getUser() === $user) {
-            // SUPPRIMER le signalement existant
-            $em->remove($signalement);
-            $em->flush();
-
-            $this->addFlash('success', 'Signalement retiré avec succès.');
-            return $this->render('cours/_signalement_button.html.twig', [
-                'cour' => $cours,
-                'update' => true,
-            ]);
+    #[Route('/signalement/{id}', name: 'cours_signalement')]
+    public function signalerOuSupprimerSignalement(Cours $cours, EntityManagerInterface $em, Security $security): Response
+    {
+        $user = $security->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour signaler un cours.');
+            return $this->redirectToRoute('app_home_dashboard');
         }
-    }
 
-    // AJOUTER un nouveau signalement
-    $signalement = new Signalement();
-    $signalement->setCours($cours);
-    $signalement->setUser($user);
-    $em->persist($signalement);
-    $em->flush();
+        // Vérifier si l'utilisateur a déjà signalé ce cours
+        foreach ($cours->getSignalements() as $signalement) {
+            if ($signalement->getUser() === $user) {
+                // SUPPRIMER le signalement existant
+                $em->remove($signalement);
+                $em->flush();
 
-    // Vérifier si le cours doit être masqué
-    if ($cours->getNombreSignalements() >= 3) {
-        $cours->setDeletedAt(new \DateTimeImmutable());
+                $this->addFlash('success', 'Signalement retiré avec succès.');
+                return $this->render('cours/_signalement_button.html.twig', [
+                    'cour' => $cours,
+                    'update' => true,
+                ]);
+            }
+        }
+
+        // AJOUTER un nouveau signalement
+        $signalement = new Signalement();
+        $signalement->setCours($cours);
+        $signalement->setUser($user);
+        $em->persist($signalement);
         $em->flush();
+
+        // Vérifier si le cours doit être masqué
+        if ($cours->getNombreSignalements() >= 3) {
+            $cours->setDeletedAt(new \DateTimeImmutable());
+            $em->flush();
+        }
+
+        $this->addFlash('success', 'Cours signalé avec succès.');
+        return $this->render('cours/_signalement_button.html.twig', [
+            'cour' => $cours,
+            'update' => true,
+        ]);
     }
+    #[Route('/admin/cours/{id}/recuperer', name: 'admin_cours_recuperer', methods: ['POST'])]
+    public function recupererCours(Cours $cours, EntityManagerInterface $em): Response
+    {
+        // Supprimer tous les signalements du cours
+        foreach ($cours->getSignalements() as $signalement) {
+            $em->remove($signalement);
+        }
 
-    $this->addFlash('success', 'Cours signalé avec succès.');
-    return $this->render('cours/_signalement_button.html.twig', [
-        'cour' => $cours,
-        'update' => true,
-    ]);
-}
-#[Route('/admin/cours/{id}/recuperer', name: 'admin_cours_recuperer', methods: ['POST'])]
-public function recupererCours(Cours $cours, EntityManagerInterface $em): Response
-{
-    // Supprimer tous les signalements du cours
-    foreach ($cours->getSignalements() as $signalement) {
-        $em->remove($signalement);
+        $em->flush();
+
+        $this->addFlash('success', 'Le cours a été récupéré avec succès.');
+
+        return $this->redirectToRoute('admin_signaled_courses');
     }
-
-    $em->flush();
-
-    $this->addFlash('success', 'Le cours a été récupéré avec succès.');
-
-    return $this->redirectToRoute('admin_signaled_courses');
-}
-
 }
